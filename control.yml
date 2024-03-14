@@ -1,0 +1,27 @@
+- hosts: all
+  gather_facts: true
+  become: yes
+  become_user: root
+
+  tasks:
+    - name: Collect PCAP file from server
+      fetch:
+        src: /home/jgpaz/Documents/PCAP/traffic.pcap
+        dest: /home/jgpaz/H0A8.1/PCAP_dest/
+        flat: yes
+
+- hosts: localhost
+  connection: local
+  gather_facts: false
+  tasks:
+    - name: Extract executable from PCAP file
+      command: "tcpflow -r /home/jgpaz/H0A8.1/PCAP_dest/traffic.pcap -o /home/jgpaz/H0A8.1/pcap_out/"
+      args:
+        creates: /home/jgpaz/H0A8.1/pcap_out/executable.exe
+    - name: Debug .exe file
+      command: "cat /home/jgpaz/H0A8.1/pcap_out/report.xml"
+      register: cat_output
+      changed_when: false
+
+    - debug:
+        var: cat_output.stdout_lines
